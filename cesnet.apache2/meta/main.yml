@@ -1,0 +1,23 @@
+---
+dependencies: []
+
+galaxy_info:
+  role_name: apache2
+  author: Yurii Tatarchuk
+  company: CESNET
+  description: Installs Apache2 and configure websites.
+  license: Apache
+  min_ansible_version: 2.5
+  platforms:
+    - name: Debian
+      versions:
+        - stretch
+        - buster
+  galaxy_tags:
+    - web
+    - apache
+    - webserver
+    - html
+    - httpd
+
+allow_duplicates: true

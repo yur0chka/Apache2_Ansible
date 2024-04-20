@@ -1,0 +1,6 @@
+---
+- name: Deploy Nginx using Ansible Galaxy
+  hosts: all
+
+  roles:
+    - cesnet.apache2

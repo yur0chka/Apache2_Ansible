@@ -1,0 +1,93 @@
+---
+- name: Install Apache
+  package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ apache_packages }}"
+  tags:
+    - install
+
+- name: Enable Apache modules
+  file:
+    src: "/etc/apache2/mods-available/{{ item }}"
+    dest: "/etc/apache2/mods-enabled/{{ item }}"
+    state: link
+  with_items: "{{ apache_modules }}"
+  notify: restart apache
+  tags:
+    - configuration
+
+- name: Create Apache2 sites-enabled folder
+  file:
+    path: "/etc/apache2/sites-enabled"
+    state: directory
+  tags:
+    - configuration
+
+- name: Create Apache sites
+  template:
+    src: "{{ item }}.jinja2"
+    dest: "/etc/apache2/{{ item }}"
+    force: yes
+    mode: 0644
+  loop: "{{ apache_create_sites }}"
+  when: apache_create_sites|length > 0
+  tags:
+    - configuration
+
+- name: Get list of Apache enabled sites
+  command: ls /etc/apache2/sites-enabled
+  register: enabled_sites
+  tags:
+    - configuration
+
+- name: Disable old Apache sites
+  command: a2dissite "{{ item }}"
+  loop: "{{ enabled_sites.stdout_lines }}"
+  when: "item not in apache_enable_sites"
+  notify:
+    - "restart apache"
+  tags:
+    - configuration
+
+- name: Remove Apache site
+  file:
+    path: "/etc/apache2/sites-enabled/{{ item }}"
+    state: absent
+  loop: "{{ apache_remove_sites }}"
+  when: apache_remove_sites|length > 0
+  notify:
+    - "restart apache"
+  tags:
+    - configuration
+
+- name: Enable Apache sites
+  file:
+    src: "/etc/apache2/sites-available/{{ item }}"
+    dest: "/etc/apache2/sites-enabled/{{ item }}"
+    state: link
+  loop: "{{ apache_enable_sites }}"
+  when: apache_enable_sites|length > 0
+  notify:
+    - "restart apache"
+  tags:
+    - configuration
+
+- name: Stop Apache
+  service:
+    state: stopped
+    name: "apache2"
+  tags:
+    - never
+    - stop
+
+- name: Start Apache
+  service:
+    state: started
+    name: "apache2"
+  tags:
+    - never
+    - start
+
+- name: "flush handlers"
+  meta: flush_handlers

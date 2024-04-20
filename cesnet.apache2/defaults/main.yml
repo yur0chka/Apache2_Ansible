@@ -1,0 +1,22 @@
+---
+# List of packages which will be installed
+apache_packages:
+  - apache2
+
+# List of Apache2 modules which will be enabled
+apache_modules:
+  - headers.load
+  - ssl.load
+  - ssl.conf
+
+# List of sites for remove
+apache_remove_sites: []
+
+# List of sites which will be copied from templates
+# Must start with sites-available (Without .jinja2)
+apache_create_sites:
+  - sites-available/000-default.conf
+  - sites-available/default-ssl.conf
+
+# List of sites which will be enabled
+apache_enable_sites: []
